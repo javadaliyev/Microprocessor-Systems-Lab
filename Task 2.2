@@ -1,26 +1,27 @@
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(9600); // Start serial communication at 9600 baud
 
-uint8_t R18;  // Declaration of unsigned integer
+uint8_t R18; // Create a variable to store the result
 
 asm volatile (
-    "ldi r16, 5\n\t" // Load 5 to r16
-    "ldi r17, 8\n\t" // Load 8 to r17
-    "add r16, r17\n\t" // Add the two numbers and store in r16
-    "mov r18, r16\n\t"    // Put result into register r18
-    "mov %0, r18\n\t"     // Copy r18 into C variable R18
-    : "=r" (R18)          // Output R18
-    :                     // No inputs
-    : "r16", "r17", "r18" // Clobbered List
+    "ldi r16, 5\n\t" // Load the number 5 into register r16
+    "ldi r17, 8\n\t" // Load the number 8 into register r17
+    "add r16, r17\n\t" // Add r16 and r17 and then store it in r16
+    "mov r18, r16\n\t" // Move the result from r16 to r18
+    "mov %0, r18\n\t" // Copy the value of r18 into the C variable R18
+    : "=r" (R18) // Output variable
+    : // No input variables
+    : "r16", "r17", "r18" // Registers used
 );
 
-Serial.println(R18);  // Print 13
+Serial.println(R18); // Print the result (13)
 
 
-  Serial.println(R18);
+
+  Serial.println(R18); // Print again
 }
 
 void loop() {
-  // loop is empty
+// No code needed here
 }
