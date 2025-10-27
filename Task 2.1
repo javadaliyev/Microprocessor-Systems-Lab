@@ -1,0 +1,12 @@
+void setup() {
+void setup() {
+    DDRB |= (1 << DDB5);   // Set PB5 (pin 13, onboard LED) as OUTPUT
+    DDRD &= ~(1 << DDD2);  // Set PD2 (pin 2, button) as INPUT
+  }
+
+  void loop() {
+    if (PIND & (1 << PIND2)) {       // Checks if button is pressed
+      PORTB ^= (1 << PORTB5);        // LED turns ON or OFF
+      delay(200);                    // 200ms delay
+    }
+  }
