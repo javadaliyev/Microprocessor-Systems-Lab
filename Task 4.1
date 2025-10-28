@@ -1,0 +1,40 @@
+volatile uint8_t counter; // Counter variable stored in SRAM
+
+void setup() {
+  Serial.begin(9600); // Start serial communication for output
+
+  while (EECR & (1 << EEPE)); // Wait if EEPROM is busy writing
+  EEAR = 0; // Set EEPROM address to 0 (first memory cell)
+  EECR |= (1 << EERE); // Read the value stored in EEPROM
+  counter = EEDR; // Save the read value into the counter variable
+
+  DDRD &= ~(1 << PD2); // Set pin PD2 as input (button pin)
+
+  Serial.print("Starting counter from: ");
+  Serial.println(counter); // Print the starting value from EEPROM
+}
+
+void loop() {
+// Check if the button is pressed
+  if (PIND & (1 << PD2)) { // If PD2 is HIGH, button is pressed
+    delay(200); // Small delay to avoid button bouncing
+
+    asm volatile(
+      "lds r24, counter    \n\t" // Load counter value into register r24
+      "inc r24             \n\t" // Increase r24 by 1
+      "sts counter, r24    \n\t" // Save the updated value back into counter
+    );
+
+    // Write the new counter value to EEPROM
+    while (EECR & (1 << EEPE)); // Wait until no other write is happening
+    EEAR = 0; // Choose EEPROM address 0
+    EEDR = counter; // Put the counter value into EEPROM data register
+    EECR |= (1 << EEMPE); // Enable master write
+    EECR |= (1 << EEPE); // Start the write process
+
+    Serial.print("Counter: ");
+    Serial.println(counter); // Show the current counter value
+
+    while (PIND & (1 << PD2)); // Wait until the button is released
+  }
+}
