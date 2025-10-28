@@ -1,0 +1,30 @@
+
+void setup() {
+  DDRB |= (1 << DDB5); // Set the LED pin as output
+}
+
+void loop() {
+  // Direct assignment method
+  PORTB = 0b00100000; // LED on   
+  delay(500);
+  PORTB = 0b00000000; // LED off          
+  delay(500);
+
+  // Using OR and AND 
+  PORTB |= 0b00100000; // LED on
+  delay(500);
+  PORTB &= 0b11011111; // LED off
+  delay(500);
+
+ // Using XOR to toggle
+  PORTB ^= 0b00100000; // Flip LED state
+  delay(500);
+  PORTB ^= 0b00100000; // Flip LED state again
+  delay(500);
+
+  // Using shift operations
+  PORTB = (1 << 5); //LED on 
+  delay(500);
+  PORTB = (1 << 0); //LED off
+  delay(500);
+}
