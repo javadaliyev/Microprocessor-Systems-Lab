@@ -1,0 +1,26 @@
+// LED1 → PD6 (about 30% brightness)
+// LED2 → PD5 (about 50% brightness)
+// LED3 → PB3 (about 80% brightness)
+
+void setup() {
+  // Set LED pins as outputs these were taken from tables in the datasheet
+  DDRD |= (1 << PD6) | (1 << PD5);
+  DDRB |= (1 << PB3);
+
+  // Timer0 setup
+  TCCR0A = (1 << COM0A1) | (1 << COM0B1) | (1 << WGM01) | (1 << WGM00); // Enable Fast PWM mode for OC0A/OC0B, non-inverting output
+  TCCR0B = (1 << CS01) | (1 << CS00); // Prescaler set to 64 (~976 Hz PWM frequency)
+
+  // Set duty cycles for Timer0 LEDs
+  OCR0A = 77; // 30% brightness
+  OCR0B = 128; // 50% brightness
+
+  // Timer2 setup
+  TCCR2A = (1 << COM2A1) | (1 << WGM21) | (1 << WGM20);  // Enable Fast PWM mode for OC2A, non-inverting output
+  TCCR2B = (1 << CS22); // Prescaler set to 64 (~976 Hz PWM frequency)
+  OCR2A = 204; // 80% brightness
+}
+
+void loop() {
+//nothing
+}
