@@ -1,0 +1,23 @@
+void setup() {
+  // LED1: Timer1 (1 Hz)
+  DDRB |= (1 << PB1); // Set PB1 as output pin (connected to LED1)
+  TCCR1A = (1 << COM1A0); // Toggle LED1 on every compare match
+  TCCR1B = (1 << WGM12) | (1 << CS12); // Enable CTC mode and set prescaler to 256
+  OCR1A = 31249; // Compare value for 1 Hz blinking (from formula: (16MHz / (2×256×1Hz)) - 1)
+
+  // LED2: Timer0 (50 Hz)
+  DDRD |= (1 << PD6); // Set PD6 as output pin (connected to LED2)
+  TCCR0A = (1 << COM0A0) | (1 << WGM01); // Toggle LED2 on compare match, use CTC mode
+  TCCR0B = (1 << CS02) | (1 << CS00); // Prescaler set to 1024
+  OCR0A = 155; // Compare value for 50 Hz blinking (from formula: (16MHz / (2×1024×50)) - 1)
+
+  // LED3: Timer2 (100 Hz)
+  DDRB |= (1 << PB3); // Set PB3 as output pin (connected to LED3)
+  TCCR2A = (1 << COM2A0) | (1 << WGM21); // Toggle LED3 on compare match, use CTC mode
+  TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20); // Prescaler set to 1024
+  OCR2A = 77; // Compare value for 100 Hz blinking (from formula: (16MHz / (2×1024×100)) - 1)
+}
+
+void loop() {
+// No code needed — LEDs blink automatically using hardware timers
+}
