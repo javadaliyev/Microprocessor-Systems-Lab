@@ -1,0 +1,70 @@
+//LED brightness levels (25%, 50%, 75%, 100%)
+const uint8_t STEPS[4] = { 64, 128, 192, 255 };
+
+//Simple delay using Timer0 overflow
+static void wait_ms_coarse(uint16_t ms) {
+  TIFR0 |= (1 << TOV0);
+  while (ms--) {
+    while ((TIFR0 & (1 << TOV0)) == 0)
+    TIFR0 |= (1 << TOV0);
+  }
+}
+
+void setup() {
+  DDRD |= (1 << PD6) | (1 << PD3); //PD6, PD3 outputs
+  DDRB |= (1 << PB3); //PB3 output
+  DDRD &= ~(1 << PD5); //PD5 input (button)
+
+  //Timer0 → LED1 (PD6)
+  TCCR0A = (1 << COM0A1) | (1 << WGM01) | (1 << WGM00);
+  TCCR0B = (1 << CS01) | (1 << CS00); //Prescaler 64
+  OCR0A = 0;
+
+  //Timer2 → LED2, LED3 (PB3, PD3)
+  TCCR2A = (1 << COM2A1) | (1 << COM2B1) | (1 << WGM21) | (1 << WGM20);
+  TCCR2B = (1 << CS22); //Prescaler 64
+  OCR2A = OCR2B = 0;
+
+  //Timer1 → external counter (PD5)
+  TCCR1A = 0;
+  TCCR1B = (1 << CS12) | (1 << CS11) | (1 << CS10);
+  TCNT1 = 0;
+
+  //Clear overflow flag
+  TIFR0 |= (1 << TOV0);
+}
+
+void loop() {
+  static uint8_t state = 0; //Current LED state
+
+  //Button press check
+  if (TCNT1 != 0) {
+    TCNT1 = 0;
+    state = (state + 1) % 13;
+
+    //Debounce
+    wait_ms_coarse(50);
+    while ((PIND & (1 << PD5)) == 0)
+      wait_ms_coarse(10);
+  }
+
+  uint8_t duty1 = 0, duty2 = 0, duty3 = 0;
+
+  if (state == 0) { //All off
+    duty1 = duty2 = duty3 = 0;
+  } else {
+    uint8_t s = state - 1;
+    uint8_t block = s / 4;
+    uint8_t step = s % 4;
+    uint8_t duty = STEPS[step];
+
+    if (block == 0) duty1 = duty;
+    else if (block == 1) { duty1 = STEPS[3]; duty2 = duty; }
+    else { duty1 = STEPS[3]; duty2 = STEPS[3]; duty3 = duty; }
+  }
+
+  //Update PWM outputs
+  OCR0A = duty1; //PD6
+  OCR2A = duty2; //PB3
+  OCR2B = duty3; //PD3
+}
